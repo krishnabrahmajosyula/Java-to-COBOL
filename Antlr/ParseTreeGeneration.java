@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -19,7 +20,8 @@ public class ParseTreeGeneration {
     private static String pdDivision;
     public static void main(String[] args) throws Exception {
         System.out.println("Executing ParseTree Generation class");
-        String code = Files.readString(Paths.get("TestScoped.java"));  // input Java code
+        Path inputPath = args.length > 1 ? Paths.get(args[1]) : Paths.get("TestScoped.java");
+        String code = Files.readString(inputPath);
         String className = args[0];
         CharStream input = CharStreams.fromString(code);
         JavaLexer lexer = new JavaLexer(input);
@@ -29,10 +31,14 @@ public class ParseTreeGeneration {
         ParseTree tree = parser.compilationUnit(); // entry rule for Java
 
         System.out.println(tree.toStringTree(parser));  // print the parse tree
+
+        ParseTreeWalker walker = new ParseTreeWalker();
+        ClassInfoExtractor classExtractor = new ClassInfoExtractor();
+        walker.walk(classExtractor, tree);
+        Map<String, ClassInfoExtractor.ClassInfo> classInfoMap = classExtractor.classes;
         
         //cobol code generation
-        ParseTreeWalker walker = new ParseTreeWalker();
-        JavaToCobolListenerPD pdListener = new JavaToCobolListenerPD(tokens);
+        JavaToCobolListenerPD pdListener = new JavaToCobolListenerPD(tokens, classInfoMap);
         walker.walk(pdListener, tree);
         System.out.println("Generated COBOL:\n" + pdListener.getCobolCodePD());
         pdDivision = pdListener.getCobolCodePD();
@@ -40,8 +46,14 @@ public class ParseTreeGeneration {
         Files.writeString(pdOutputPath, pdDivision, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         System.out.println("Procedure division written to genPD.txt");
         VariableExtractor idDdListener = new VariableExtractor();
-        VariableExtractor.variableExtractor(className);
+        VariableExtractor.variableExtractor(className, inputPath.toString(), pdListener.getReturnVars(),
+                classInfoMap.keySet());
         idDdDivisions = idDdListener.getIdentificationDataDivisions();
+        java.io.StringWriter oopData = new java.io.StringWriter();
+        try (java.io.PrintWriter oopWriter = new java.io.PrintWriter(oopData)) {
+            OopDataDivisionGen.generateClassRecords(classInfoMap, pdListener.getObjectVariables(), oopWriter);
+        }
+        idDdDivisions += oopData;
         Path outputPath = Paths.get("../finalCobolCode.cbl");
         // System.out.println("----------------Data division starts-----------------");
         // System.out.println(idDdDivisions);

@@ -7,7 +7,22 @@ import java.util.*;
 
 public class VariableExtractor {
     public static void variableExtractor(String className) throws Exception{
-        CharStream codeStream = CharStreams.fromFileName("TestScoped.java");
+        variableExtractor(className, "TestScoped.java", Collections.emptyMap());
+    }
+
+    public static void variableExtractor(String className, Map<String, String> returnVars) throws Exception{
+        variableExtractor(className, "TestScoped.java", returnVars);
+    }
+
+    public static void variableExtractor(String className, String inputFile,
+                                         Map<String, String> returnVars) throws Exception{
+        variableExtractor(className, inputFile, returnVars, Collections.emptySet());
+    }
+
+    public static void variableExtractor(String className, String inputFile,
+                                         Map<String, String> returnVars,
+                                         java.util.Set<String> oopClassNames) throws Exception{
+        CharStream codeStream = CharStreams.fromFileName(inputFile);
         String codeTxt = codeStream.toString();
         
         JavaLexer lexer = new JavaLexer(codeStream);    // initialising lexer
@@ -17,7 +32,7 @@ public class VariableExtractor {
 
         ParseTree tree = parser.compilationUnit();    // generating parse tree
         ParseTreeWalker walker = new ParseTreeWalker();
-        VariableListenerScoped extractor = new VariableListenerScoped();
+        VariableListenerScoped extractor = new VariableListenerScoped(oopClassNames);
         walker.walk(extractor, tree);
 
         extractor.writeToFile("variables.txt");
@@ -27,7 +42,7 @@ public class VariableExtractor {
         // appender.applyInsertions("Test1_modified.java");
         // MethodInjector.injectMethods("Test1.java", extractor.getVariableData());
         // System.out.println("Modified file written to Test1_modified.java");
-        DataDivisionGen.generateDataDivision("variables.txt", "cobol_test1.cbl",className);
+        DataDivisionGen.generateDataDivision("variables.txt", "cobol_test1.cbl", className, returnVars);
     }
     public String getIdentificationDataDivisions(){
         String filePath = "cobol_test1.cbl";  // Ensure this path is correct

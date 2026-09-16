@@ -1,7 +1,28 @@
-public class TestScoped {
+public class Animal {
+
+    String name;
+
+    void speak() {
+        System.out.println(name);
+    }
+}
+
+class Dog extends Animal {
+
+    int age;
+
+    void speak() {
+        System.out.println(name);
+        System.out.println(age);
+    }
+}
+
+class Main {
 
     public static void main(String[] args_main) {
-        int a_main = 5;
-        System.out.println("Position in alphabet: " + (a_main + Math.abs(-5)));
+        Dog d = new Dog();
+        d.name = "Rex";
+        d.age = 3;
+        d.speak();
     }
 }

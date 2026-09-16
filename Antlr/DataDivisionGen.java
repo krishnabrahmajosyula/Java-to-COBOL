@@ -1,14 +1,20 @@
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DataDivisionGen {
 
     private static String mapJavaTypeToCobolPic(String javaType) {
         javaType = javaType.toLowerCase();
-        if (javaType.contains("int") || javaType.contains("long")) {
-            return "PIC S9(5).";
-        } else if (javaType.contains("float") || javaType.contains("double")) {
-            return "PIC S9(5)V9(2).";
+        if (javaType.contains("long")) {
+            return "PIC S9(18).";
+        } else if (javaType.contains("int") || javaType.contains("short") || javaType.contains("byte")) {
+            return "PIC S9(9).";
+        } else if (javaType.contains("double")) {
+            return "PIC S9(9)V9(6).";
+        } else if (javaType.contains("float")) {
+            return "PIC S9(5)V9(4).";
         } else if (javaType.contains("char")) {
             return "PIC X(1).";
         } else if (javaType.contains("boolean")) {
@@ -19,6 +25,11 @@ public class DataDivisionGen {
     }
 
     public static void generateDataDivision(String inputFile,String outputFile,String className)throws IOException{
+        generateDataDivision(inputFile, outputFile, className, Collections.emptyMap());
+    }
+
+    public static void generateDataDivision(String inputFile, String outputFile, String className,
+                                            Map<String, String> returnVars) throws IOException {
         try(BufferedReader reader=new BufferedReader(new FileReader(inputFile));
         PrintWriter writer=new PrintWriter(new FileWriter(outputFile))){
             String[] cblPgmID=outputFile.split("\\.");    // extracting the name of the cobol file
@@ -58,8 +69,8 @@ public class DataDivisionGen {
                         currMethodName = "";  // Reset if not in a method scope
                     }
 
-                } else if (line.startsWith("Type:")) {
-                    currType = line.substring(5).trim();
+                } else if (line.trim().startsWith("Type:")) {
+                    currType = line.trim().substring(5).trim();
                 } else if (!line.isEmpty()) {
                     String variableName = line;
                     String cobolVarname = "";
@@ -67,45 +78,79 @@ public class DataDivisionGen {
 
                     int sizeIdx = variableName.indexOf("[size=");
                     if (sizeIdx != -1) {
-                        // cobolVarname = variableName.substring(0, sizeIdx).trim().toUpperCase().replace("[SIZE=[]]", "");
-                        cobolVarname = variableName.substring(0, sizeIdx).trim().replace("[SIZE=[]]", "");
+                        // Extract clean variable name (everything before "[size=")
+                        cobolVarname = variableName.substring(0, sizeIdx).trim();
 
-                        int openingBracket = variableName.indexOf('[', sizeIdx);
-                        int closingBracket = variableName.indexOf(']', openingBracket + 1);
+                        // Extract the content inside [size= ... ]
+                        // Format from VariableInfo.toString(): "name [size=[2,3]]" or "name [size=[5]]" or "name [size=[]]"
+                        int sizeContentStart = variableName.indexOf('[', sizeIdx + 6); // skip past "[size="
+                        int sizeContentEnd   = variableName.indexOf(']', sizeContentStart + 1);
 
-                        if (openingBracket != -1 && closingBracket != -1) {
-                            arraySize = variableName.substring(openingBracket + 1, closingBracket).replaceAll("[^0-9]", "");
+                        String sizeContent = "";
+                        if (sizeContentStart != -1 && sizeContentEnd != -1) {
+                            sizeContent = variableName.substring(sizeContentStart + 1, sizeContentEnd).trim();
+                            // sizeContent is now "2,3" or "5" or "" or "?"
                         }
 
-                        if (!arraySize.isEmpty()) {
+                        if (sizeContent.contains(",")) {
+                            // ---- 2D array: "2,3" → nested OCCURS ----
+                            String[] dimParts = sizeContent.split(",");
+                            String dim0 = dimParts[0].trim();
+                            String dim1 = dimParts[1].trim();
+                            String rowName = cobolVarname + "-ROW";
+                            String grpName = cobolVarname + "-ARRAY";
+
+                            writer.printf("       01  %-15s.%n", grpName);
+                            writer.printf("           05  %-12s OCCURS %s TIMES.%n", rowName, dim0);
+                            writer.printf("               10  %-8s %s OCCURS %s TIMES.%n",
+                                    cobolVarname, mapJavaTypeToCobolPic(currType).replace(".", ""), dim1);
+
+                            if (currScope.contains("METHOD")) {
+                                methodVariables.computeIfAbsent(currMethodName, k -> new ArrayList<>())
+                                        .add(new String[]{grpName, "GROUP"});
+                                methodVariables.get(currMethodName).add(new String[]{
+                                        cobolVarname,
+                                        mapJavaTypeToCobolPic(currType).replace(".", "")
+                                        + " OCCURS " + dim0 + " TIMES"
+                                });
+                            }
+
+                        } else if (!sizeContent.isEmpty() && sizeContent.matches("\\d+")) {
+                            // ---- 1D array with known size ----
+                            arraySize = sizeContent;
                             String arrayGrpName = cobolVarname + "-ARRAY";
                             writer.printf("       01  %-15s.%n", arrayGrpName);
                             writer.printf("           05  %-12s %s OCCURS %s TIMES.%n",
                                     cobolVarname, mapJavaTypeToCobolPic(currType).replace(".", ""), arraySize);
-
-                            if (currScope.contains("METHOD")) {
-                                methodVariables.computeIfAbsent(currMethodName, k -> new ArrayList<>())
-                                        .add(new String[]{cobolVarname + "-ARRAY", "GROUP"});
-
-                                methodVariables.get(currMethodName).add(new String[]{
-                                        cobolVarname, mapJavaTypeToCobolPic(currType).replace(".", "") + " OCCURS " + arraySize + " TIMES"
-                                });
-                            }
-                        } else {
-                            String arrayGrpName = variableName.toUpperCase().replace(" ", "_") + "-ARRAY";
-                            writer.printf("       01  %-15s.%n", arrayGrpName.replace("[SIZE=[]]", ""));
-                            // writer.printf("           05  %-12s %s OCCURS 100 TIMES.%n",
-                            //         cobolVarname.toUpperCase(), mapJavaTypeToCobolPic(currType).replace(".", ""));
-                            writer.printf("           05  %-12s %s OCCURS 100 TIMES.%n",
-                                    cobolVarname, mapJavaTypeToCobolPic(currType).replace(".", ""));
+                            // Emit companion -MAX variable for enhanced-for loops
+                            writer.printf("       01  %-15s PIC S9(9) VALUE %s.%n",
+                                    cobolVarname + "-MAX", arraySize);
 
                             if (currScope.contains("METHOD")) {
                                 methodVariables.computeIfAbsent(currMethodName, k -> new ArrayList<>())
                                         .add(new String[]{arrayGrpName, "GROUP"});
-
                                 methodVariables.get(currMethodName).add(new String[]{
-                                        // cobolVarname.toUpperCase(), mapJavaTypeToCobolPic(currType).replace(".", "") + " OCCURS 100 TIMES"
-                                        cobolVarname, mapJavaTypeToCobolPic(currType).replace(".", "") + " OCCURS 100 TIMES"
+                                        cobolVarname,
+                                        mapJavaTypeToCobolPic(currType).replace(".", "") + " OCCURS " + arraySize + " TIMES"
+                                });
+                            }
+
+                        } else {
+                            // ---- 1D array with unknown size → default 100 ----
+                            String arrayGrpName = cobolVarname + "-ARRAY";
+                            writer.printf("       01  %-15s.%n", arrayGrpName);
+                            writer.printf("           05  %-12s %s OCCURS 100 TIMES.%n",
+                                    cobolVarname, mapJavaTypeToCobolPic(currType).replace(".", ""));
+                            // Emit companion -MAX variable (default 100)
+                            writer.printf("       01  %-15s PIC S9(9) VALUE 100.%n",
+                                    cobolVarname + "-MAX");
+
+                            if (currScope.contains("METHOD")) {
+                                methodVariables.computeIfAbsent(currMethodName, k -> new ArrayList<>())
+                                        .add(new String[]{arrayGrpName, "GROUP"});
+                                methodVariables.get(currMethodName).add(new String[]{
+                                        cobolVarname,
+                                        mapJavaTypeToCobolPic(currType).replace(".", "") + " OCCURS 100 TIMES"
                                 });
                             }
                         }
@@ -120,6 +165,11 @@ public class DataDivisionGen {
                         }
                     }
                 }
+            }
+
+            for (Map.Entry<String, String> returnVar : returnVars.entrySet()) {
+                writer.printf("       01  %-15s %s%n", "RETURN-" + returnVar.getKey(),
+                        mapJavaTypeToCobolPic(returnVar.getValue()));
             }
 
             // Write additional data division files for methods

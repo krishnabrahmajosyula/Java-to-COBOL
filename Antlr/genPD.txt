@@ -6,12 +6,23 @@
            STOP RUN.
 
 
+       ANIMAL-SPEAK-PARA.
+       DISPLAY ANIMAL-OBJ-NAME
+       EXIT.
+
+
+       DOG-SPEAK-PARA.
+       DISPLAY DOG-OBJ-NAME
+       DISPLAY DOG-OBJ-AGE
+       EXIT.
+
+
        MAIN-PARA.
-       MOVE 5 TO a_main
-       DISPLAY "Position in alphabet: "
-       COMPUTE TEMP_1 = ABS - 5
-       COMPUTE TEMP_2 = FUNCTION + TEMP_1
-       COMPUTE TEMP_0 = TEMP_2
-       DISPLAY TEMP_0
+       INITIALIZE DOG-D-INST
+       MOVE "Rex" TO DOG-D-INST-NAME
+       MOVE 3 TO DOG-D-INST-AGE
+       MOVE DOG-D-INST TO DOG-OBJ
+       PERFORM DOG-SPEAK-PARA
+       MOVE DOG-OBJ TO DOG-D-INST
        EXIT.
 

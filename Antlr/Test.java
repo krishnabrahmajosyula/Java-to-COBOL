@@ -1,6 +1,27 @@
-public class Test {
+public class Animal {
+    String name;
+
+    void speak() {
+        System.out.println(name);
+    }
+}
+
+class Dog extends Animal {
+    int age;
+
+    void speak() {
+        System.out.println(name);
+        System.out.println(age);
+    }
+}
+
+class Main {
     public static void main(String[] args) {
-	int a = 5;
-        System.out.println("Position in alphabet: " + (a + Math.abs(-5)));
+        Dog d = new Dog();
+
+        d.name = "Rex";
+        d.age = 3;
+
+        d.speak();
     }
 }
