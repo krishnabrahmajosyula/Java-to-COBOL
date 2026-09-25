@@ -1,0 +1,9 @@
+Using .length(): 
+The amount of characters in this word is : 12
+The amount of characters in this other word is : 37
+Using .substring(): 
+The section of word from index 0-5 is : Hello
+The section of word from index 5-10 is :  is g
+Using .charAt(): 
+The character at index 1 is : e
+The character at index 10 is : o

@@ -1,0 +1,85 @@
+blob_id,repo_name,path,stage,reason
+1a70a9a76b9d67354f3edcaa2e9a5092184d26ba,MZKhan18/Java,/Java Programming/src/Programms/loop_46.java,ast_allowlist,has a package declaration
+78c09c1ac08c07c6711727d845e3fa686ff10396,MR-P17/larva-rv-tool,/Other projects/LarvaLogicConv/Automata/src/newPEA/Unary.java,ast_allowlist,has a package declaration
+fe424cf91da0e9b27d61610a59ef4cbb6bd04e3b,agrigore425/cse373,/CSE 373 HW 4/MyGraph.java,ast_allowlist,class 'MyGraph' uses implements
+9644b2c5f8035ea955408e7bf241cfb85baa7780,pauljoo/xpanda-commons-generate,/xpanda-commons-generate-engine/src/main/java/info/xpanda/commons/generate/engine/model/local/LocalGenerateModelLoader.java,ast_allowlist,has a package declaration
+208059c1409d4a5057c6b1859b88bba4f2316275,magefree/mage,/Mage.Sets/src/mage/cards/e/EdgeOfTheDivinity.java,ast_allowlist,has a package declaration
+9480a25ff6e2f8a970a909e8360ee2a4e18ccb04,MeganCodeNote/LeetCode,/src/main/java/BestTimeBuyAndSellStock.java,ast_allowlist,imports 'java.util.Arrays' (only java.util.Scanner allowed)
+e6065b73a95eb6bb67f0e7c38444c19ccdf30fc0,chamanbharti/java-works,/data-structure-and-algorithm/core-java/src/main/java/com/ds/array/Array2.java,ast_allowlist,failed to parse (JavaSyntaxError)
+4bad0c4b96b155d154d8d1bf0fe8635db109d1ef,Maxakipust/Neural-Net,/src/Network.java,ast_allowlist,imports 'java.io.Serializable' (only java.util.Scanner allowed)
+7d324d9a2fefd1d16ca7137b1884e4beec5aa3e5,sprintgether/original-think,/ot-server/src/main/java/com/sprintgether/otserver/model/payload/ExceptionMessage.java,ast_allowlist,has a package declaration
+d732ea79b2254cb313ebb45221841345597dee63,lethalpunch/AppAndroid,/Analyzer/src/com/aanand/analyzer/utility/AnalyzerMainUtility.java,ast_allowlist,has a package declaration
+995a755c9f72568ba7e9a777d4991acecdc63e80,xowns4817/toy_project_user,/src/main/java/com/simple/portal/biz/v1/user/exception/FollowFailedException.java,ast_allowlist,has a package declaration
+547241e0f8c79f1139d3a02f12e9a8fd7ea4e1e0,johansalusu/APPL1,/Pertemuan 2/src/CopyingAFile/FileCopy.java,ast_allowlist,has a package declaration
+49ac618fa36e7774e30784ccd0e2b379895de872,davidshenba/jms-example,/src/main/java/com/shenba/example/repository/TransactionRepository.java,ast_allowlist,has a package declaration
+43f1b572730ddfe6c6d5092069996453f060d8ae,jmnl225/Android-practice,/Ex82RetrofitBoard/app/src/main/java/com/jmnl2020/ex82retrofitboard/BoardItem.java,ast_allowlist,has a package declaration
+6fc138b8c7476206dd63d7975a32a6be85ef1c35,zhangjunke/dubbomock,/src/main/java/com/junker/dubbomock/passport/impl/UserInfoByTokenImpl.java,ast_allowlist,has a package declaration
+1d30bb9359c89472020e86c961b5b2feea4b8bb1,itowne/posmall,/src/main/java/com/newland/posmall/biz/cust/Agmt4PageBiz.java,ast_allowlist,has a package declaration
+48064ac2df9d04c4f884371319a178184f8f32e6,sulongfei001/ksource-liangfa-web,/src/main/java/com/ksource/liangfa/service/instruction/WorkReportService.java,ast_allowlist,has a package declaration
+0b09fca4dcb602f6fcef103735abf603f2cbd37d,macc704/ObproText,/SamplesVol2/oo04/src_shooting/PlayerAircraft.java,ast_allowlist,imports 'obpro.gui.BCanvas' (only java.util.Scanner allowed)
+5fb28ada2cf4440c5458fb291e56bfc4e21611cd,Naim-Reza/File-encoder,/src/reza/decoder/DecodeServer.java,ast_allowlist,has a package declaration
+766671b02f8c50065c8ac6eb821b01a0fe62808d,Submergechen/AlgoriPractice,/RePractice/SwordOffer/Code_1216_4Find.java,ast_allowlist,has a package declaration
+dcdd35e26759dbbdab579d6e078b47d58853b2c4,joaqin/dosirak,/Board_MVC/src/action/com/tistory/gangzzang/UpdateProcAction.java,ast_allowlist,has a package declaration
+8a011639591ed60a3d828f3a77da13075b5de783,alireza-ebrahimi/telegram-talaeii,/5.3.5/sources/org/telegram/customization/Internet/HandleRequest$30.java,ast_allowlist,has a package declaration
+67738c3ec674d00eb525015dd8419fb4c3a4a1a7,camilaemilly/TCC,/src/main/java/br/diabetes/remedio/RemedioId.java,ast_allowlist,has a package declaration
+53458ad1263dc4a14c9ca7c3bf1a057d42bcb242,LucasMartins007/curso-especialista-spring-boot,/1.9 Publicando e consumindo eventos customizados/esrfood-api/src/main/java/com/smart/esrfood/di/service/AtivacaoClienteService.java,ast_allowlist,has a package declaration
+a14c4769153f19d4aa193aee38f536c9677eccef,FreyrChen/tucan_Linux_practice,/4_Android_program/New Folder/Socket/src/mars/socket/SocketActivity.java,ast_allowlist,has a package declaration
+db9ec3c17de3c00366cf8edd424378b4247e12d4,ssingh2017/Ncell,/EntUploadHandler.java,ast_allowlist,has a package declaration
+ceaaaa21a213d8aad8d1c58b28f2211e0197658e,FranklinNEO/BeautyCamera2016,/app/src/main/java/cn/poco/album/site/AlbumSite4.java,ast_allowlist,has a package declaration
+af759298b514005681b1b98e2fe4da6814a8ff65,cha63506/CompSecurity,/domioz-source/src/com/dominos/beacon/util/BeaconNotificationUI.java,ast_allowlist,has a package declaration
+855f92c7e754d48835ba7ca14e1261de93349fbd,Raffone17/Utils,/Java/4/MioUfficio.java,ast_allowlist,declares an array not produced by String.split
+2d249616a8e7da99f6362f57be6faa5d3fa362a3,yangxiaodong1/yunzh,/src/main/java/com/thinkgem/jeesite/modules/helpcenter/entity/Thelpcenter.java,ast_allowlist,has a package declaration
+8107e7f53a99f72f597d99bd99461321d023c138,jlpuma24/networkingapp-android,/app/src/main/java/com/networkingandroid/adapters/OnBoardingPagerAdapter.java,ast_allowlist,has a package declaration
+16e0ef17ea49a0ba6d2c29deba1a1c4269303e1d,ZaleJ/NJWB,/src/com/njwb/jzl/java/SortStu.java,ast_allowlist,has a package declaration
+62fff2c67ae56ee457ebb90668c3f6e67e75c5c8,fzyycp/fwmf-module,/fwmf-module-user-role/fwmf-module-user-role-service/src/main/java/cn/faury/fwmf/module/service/user/sqlProvider/PushRUserGroupsSQLProvider.java,ast_allowlist,has a package declaration
+28be3c04f3f19b969d6665abfa7aef3bf95f5c3d,rafaelpadilha/trabalho8pc3_RafaelPadilha,/trab8pc3_RafaelPadilha/src/main/java/br/com/prog3/aula15/controller/Teste.java,ast_allowlist,has a package declaration
+247c3ac202cc53ce921028cfa0181d383b3930f2,s8anc/DataStructure,/JavaPracttice/src/com/ds/arrays/SubArraySumGreaterThanGivenNumber.java,ast_allowlist,has a package declaration
+44741aa15a35a6f5486ec86b865fe5f1a1303cf3,TKMingGit/design-pattern,/src/com/mingzhao/designpattern/pattern23/p6/abstractfactory/after/AutumnComboBox.java,ast_allowlist,has a package declaration
+89c287cee699692116cebc4084583508cb58af77,jorennejf/horror-storybook-game,/KidScenario.java,ast_allowlist,imports 'javafx.event.ActionEvent' (only java.util.Scanner allowed)
+2b3ee584e4c7a9e2c47d9661574116de104b4fb1,QMSCount/DReader,/app/src/main/java/com/duokan/reader/ui/reading/p054a/C1432m.java,ast_allowlist,has a package declaration
+6dec3ed1b5cad6ec7b11259c8cca4df183f0d0dd,juleslagarde/bluelineconsole,/app/src/main/java/net/nhiroki/bluelineconsole/commandSearchers/CalculatorCommandSearcher.java,ast_allowlist,has a package declaration
+11d22f4087ce3df6caa3f2eec9f8bd6c63be42ec,jasmeet167/PW-NextGen,/life-common/src/main/java/com/csc/fsg/life/biz/dao/SqlSessionTemplateDelegate.java,ast_allowlist,has a package declaration
+6d0c58a311a96d9980b0c486012e17be306cb75e,mvignale1987/FlickrExample,/app/src/main/java/com/mauri/android/flickrexample/activities/PhotoActivity.java,ast_allowlist,has a package declaration
+081ffe8389f943c79e89c725888d26dbf5e3eefd,lyricluo/LECTURE_01_18,/src/Rational.java,ast_allowlist,field has modifier ['private']
+c2c3384fceaae916fa3d8c291029650ab044ff1b,astverha/ThingworxVirtualProductionLine,/Linev2/src/main/java/configuration/Line.java,ast_allowlist,has a package declaration
+777899a08123bee5a58b99380f678e29b080a14d,reverseengineeringer/com.grubhub.android,/src/com/urbanairship/CoreActivity.java,ast_allowlist,has a package declaration
+a64e376e6cf76fa2b11647845d48e466241fed51,Rune-Status/Promises-refactored-client-435,/src/main/java/org/runejs/client/net/codec/runejs435/decoder/widget/model/RotateWidgetModelMessageDecoder.java,ast_allowlist,has a package declaration
+8a8d86d96d25d5cd98426bc9f6201b03afac7f79,aniXification/AndroidUserInterface,/app/src/main/java/com/aniXification/asrandroiduserinterface/intent/PassDataActivity.java,ast_allowlist,has a package declaration
+a335b6c506a69f3bee48e8938f01aee5cde1f422,sharontur/JavaPractice,/src/Unknown.java,ast_allowlist,constructor overloading
+b58fb3debce31c1f3dd5aa6e4f22b715310e17bd,arraycto/bxycloud,/services/system-service/src/main/java/com/boxiaoyun/system/mapper/LoginLogsMapper.java,ast_allowlist,has a package declaration
+98d695f345c4e1af770342cc51a830dc89106630,leekspace/demo,/demo-javase/src/main/java/com/leekli/javase/java8/lambda/Person.java,ast_allowlist,has a package declaration
+4974da26fb0cf2db2665a60e1df0d05bfca889a1,dingfei2018/anfapc,/src/main/java/com/supyuan/front/goods/GoodsSvc.java,ast_allowlist,has a package declaration
+97b9f619d30d69406f1d692e3dedecf275f5f55f,aschenoni/Hanon,/app/hanon/app/model/player/noteimage/DownNoteFlag.java,ast_allowlist,has a package declaration
+9ccb7ce286a69eef3984de36d5ab1a321a3075cc,luodongfu/Bigdata_Auto_Deploy_Sys,/web/src/main/java/com/bryantchang/autodepsys/controller/api/clustermanage/ClusterOps.java,ast_allowlist,has a package declaration
+01b279e2838305eb355169e7c6bc49715a31ad2e,RuchdeePSU/MySQLiteDemo,/app/src/main/java/com/example/ruchee/mysqlitedemo/MyDBHandler.java,ast_allowlist,has a package declaration
+823e3d1dd7d6d3b6557770aa6ada6bbfbac113cd,ande3674/solo_book_club,/src/main/java/UpdateReviewGUI.java,ast_allowlist,imports 'javax.swing' (only java.util.Scanner allowed)
+e724b5d0bf3f26df964a488e6ba853b4fa965a2c,EmbedITCZ/jbehave-support,/jbehave-support-core/src/main/java/org/jbehavesupport/core/internal/expression/UnescapeCommand.java,ast_allowlist,has a package declaration
+9272cf9e19b29caabcaac5f4450c645217342011,rbngrc/AccesoRegistro,/src/dam2/add/p8/HibernateManager.java,ast_allowlist,has a package declaration
+9a6d922457f725241bd0134d147ad7c604d6b1c1,ianmartorell/djinn,/app/src/main/java/com/djinnapp/djinn/EventAdapter.java,ast_allowlist,has a package declaration
+9064e870396784211f33a110a821b09dfbedf450,saltedge/compliance-examples,/saltedge-compliance-connector-java-v2/compliance-connector-sdk/src/main/java/com/saltedge/connector/sdk/config/ApplicationProperties.java,ast_allowlist,has a package declaration
+712cf804bb6f27aa09b50aaf3db1f344b754394f,zjzjgxw/BlackIron,/src/main/java/com/gxw/store/project/user/mapper/AdminMapper.java,ast_allowlist,has a package declaration
+48c6847a7f8dc13b09cc86b8b1333d379fe2041b,developerCodeRepository/my_core_library,/my_core_code/src/main/java/com/learn/javase/reflect/Test.java,ast_allowlist,has a package declaration
+52946d8cbdbd02b8ee85fbe4942129496f50ae36,Apokalipsa/BILD-IT-Zadaci,/Pauza/src/ZadaciAvgust/TriangleKlasa.java,ast_allowlist,has a package declaration
+647cf12695c678c2eea3811ddd515737f0dc2407,vanshianec/Codewars,/3 kyu/Calculator.java,ast_allowlist,method has modifier ['static']
+0ac204d8d88e2d80aa0406c1ac7622a36e02d35e,mckatoo/cryptoassets,/desktop/cryptoassets/src/main/java/io/ikatoo/cryptoassets/models/abstracts/PortifolioATM.java,ast_allowlist,has a package declaration
+80dff799641ebed522ca64e88c8f0d4f5a33aeea,wangmingshun/cms,/cms-core/src/main/java/com/wms/cms/dao/UserDao.java,ast_allowlist,has a package declaration
+214ce8f8d33e2d06cfebf94c5678f7eb9947cf8e,Severed-Infinity/OOSAD2,/Week2/org/week2/CartItem.java,ast_allowlist,has a package declaration
+98e8087da861645fe753a360990a1eddaa98152f,zcwshu/leetcode,/src/com/zcw/jingdong/Test1.java,ast_allowlist,has a package declaration
+5ec21fe8270c2fa5c51198d9faaf444957d4f7b7,bszczepa/agh-mwo-enroller-rest,/src/main/java/com/company/enroller/persistence/MeetingService.java,ast_allowlist,has a package declaration
+383f7a3a52a9001d9d1fd211ab9e3356209c40f2,zhongxingyu/Seer,/Diff-Raw-Data/31/31_81c983f5f2a93dba8e4139ae0e821278d718d6a8/ConnComponentAction/31_81c983f5f2a93dba8e4139ae0e821278d718d6a8_ConnComponentAction_t.java,ast_allowlist,has a package declaration
+42a9a670c2f387e885de2fda597aed555fbc6f65,andreasagap/Undergraduate-Projects,/QuickHull/Paths.java,ast_allowlist,has a package declaration
+4483faf93ebed576740f472d3d0b14995ebb1b83,amirashad/trainsandtowns,/src/main/java/az/amirashad/trainsandtowns/graph/Graph.java,ast_allowlist,has a package declaration
+37656a8651032e75c59ae34788f33b3c96bb59d7,wangqingshan/desin_pattern,/src/main/java/com/example/design/pattern/day18/impl/AbstractSubject.java,ast_allowlist,has a package declaration
+462e6dcf64a3c80f379db2644214b70b849814db,brawner/MultiAgentGames,/src/Analysis/PolicyComparisonWithKLDivergence.java,ast_allowlist,has a package declaration
+99fba94e567842a0c5b384022390fd31d2a16fda,y62wang/vegapunk,/src/main/java/com/y62wang/chess/game/uci/UCIImpl.java,ast_allowlist,has a package declaration
+4b54cbd887dc74774a38105562d5f0bc4848cd89,FIX779/FIX779,/Hometask/src/main/java/hometask/Zadanie1/Punkt1.java,ast_allowlist,has a package declaration
+c3bdd49cd77e7533d86bf78d6be9068880f65c34,zwhofearth/springboot-baomidou-learning,/src/main/java/com/dnp/test/modular/controller/UserRoleController.java,ast_allowlist,has a package declaration
+2abd15d9f88a8dc69138ec04bfe5166d318e92b0,paumon64/RumosAcademiaJavaProject,/src/java/com/example/beans/ArticlesController.java,ast_allowlist,has a package declaration
+b79416b8b41489424ece4f93acea9d9ffa8eb8d9,Realhaqq/DevFestqrScanner,/app/src/main/java/com/haqq/qrscanner/ScanActivity.java,ast_allowlist,has a package declaration
+f34bfcd62260b6e390d843b06d2d84ec98d802a1,Zn0w/BankingProject,/bankingproject/src/main/java/bankingproject/ui/LoginServlet.java,ast_allowlist,has a package declaration
+4a68c9c151cdc7ac32c004dd09e08f7783949fc1,LA-Architecture-Club/clean-architecture-ochre,/src/main/java/io/pivotal/pulsedomain/CreateProjectUseCase.java,ast_allowlist,has a package declaration
+18f3fccfcaff154323b78cb3772a55b172552e49,radiegues06/POO-Curso,/ScrambleWordsGame/src/main/Principal.java,ast_allowlist,has a package declaration
+00decb93788f0e0e51610e50bf0175b25e1862cd,w3farid/supershop,/app/src/main/java/com/supershop/service/UserService.java,ast_allowlist,has a package declaration
+1c5b8a2315b0e24cd3f6fe3d873ae13c33e40deb,rwl/jOS,/ios-plugin/src/main/java/jos/build/types/Orientation.java,ast_allowlist,has a package declaration
+66bf8614b6e6eb2b745b4c23eee9c7feae3fb4ab,hamzamughal74/IslamicApp,/app/src/main/java/com/example/islamicapp/OnlineCounselling.java,ast_allowlist,has a package declaration
+bc96dad0cef245769132fac06eca6200b90f690c,csaki/StockHawk,/app/src/main/java/com/sam_chordas/android/stockhawk/data/WidgetProvider.java,ast_allowlist,has a package declaration
