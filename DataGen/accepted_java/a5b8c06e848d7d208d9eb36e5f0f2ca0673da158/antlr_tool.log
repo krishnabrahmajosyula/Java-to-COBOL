@@ -1,0 +1,81 @@
+=== TestJavaVariableScoping (exit 0) ===
+
+
+=== ParseTreeGeneration (exit 0) ===
+Executing ParseTree Generation class
+(compilationUnit (typeDeclaration (classDeclaration class (identifier Test) (classBody { (classBodyDeclaration (modifier (classOrInterfaceModifier public)) (modifier (classOrInterfaceModifier static)) (memberDeclaration (methodDeclaration (typeTypeOrVoid void) (identifier main) (formalParameters ( (formalParameterList (formalParameter (typeType (classOrInterfaceType (typeIdentifier String)) [ ]) (variableDeclaratorId (identifier args_main)))) )) (methodBody (block { (blockStatement (localVariableDeclaration (typeType (primitiveType int)) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier a_main)) = (variableInitializer (expression (primary (literal (integerLiteral 10)))))) , (variableDeclarator (variableDeclaratorId (identifier b_main)) = (variableInitializer (expression (primary (literal (integerLiteral 10)))))))) ;) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (primary (literal "\n------ Before ------")))) )))) ;)) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (expression (primary (literal "Value of a before: "))) + (expression (primary (identifier a_main))))) )))) ;)) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (expression (primary (literal "Value of b before: "))) + (expression (primary (identifier b_main))))) )))) ;)) (blockStatement (localVariableDeclaration (typeType (primitiveType int)) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier prefix_main)) = (variableInitializer (expression ++ (expression (primary (identifier a_main)))))))) ;) (blockStatement (localVariableDeclaration (typeType (primitiveType int)) (variableDeclarators (variableDeclarator (variableDeclaratorId (identifier postfix_main)) = (variableInitializer (expression (expression (primary (identifier b_main))) ++))))) ;) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (primary (literal "\n------ After ------")))) )))) ;)) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (expression (primary (literal "prefix value: "))) + (expression (primary (identifier prefix_main))))) )))) ;)) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (expression (primary (literal "Value of a now: "))) + (expression (primary (identifier a_main))))) )))) ;)) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (expression (primary (literal "postfix value: "))) + (expression (primary (identifier postfix_main))))) )))) ;)) (blockStatement (statement (expression (expression (expression (primary (identifier System))) . (identifier out)) . (methodCall (identifier println) (arguments ( (expressionList (expression (expression (primary (literal "Value of b now: "))) + (expression (primary (identifier b_main))))) )))) ;)) }))))) }))) <EOF>)
+Text before int a_main = 10, b_main = 10
+Text after int a_main = 10, b_main = 10
+RISHA LAB Permit brand-----------: int a_main 10, b_main = 10int a_main 
+Text after char conversion: int a_main = 10, b_main = 10;
+false
+Text before System.out.println("\n------ Before ------");
+Text after System.out.println("\n------ Before ------");
+------");****
+Text before System.out.println("Value of a before: " + a_main);
+Text after System.out.println("Value of a before: " + a_main);
+a_main);****
+Text before System.out.println("Value of b before: " + b_main);
+Text after System.out.println("Value of b before: " + b_main);
+b_main);****
+Text before int prefix_main = ++a_main
+Text after int prefix_main = ++a_main
+RISHA LAB Permit brand-----------: int prefix_main ++a_mainint prefix_main 
+Text after char conversion: int prefix_main = ++a_main;
+false
+Text before int postfix_main = b_main++
+Text after int postfix_main = b_main++
+RISHA LAB Permit brand-----------: int postfix_main b_main++int postfix_main 
+Text after char conversion: int postfix_main = b_main++;
+false
+Text before System.out.println("\n------ After ------");
+Text after System.out.println("\n------ After ------");
+------");****
+Text before System.out.println("prefix value: " + prefix_main);
+Text after System.out.println("prefix value: " + prefix_main);
+prefix_main);****
+Text before System.out.println("Value of a now: " + a_main);
+Text after System.out.println("Value of a now: " + a_main);
+a_main);****
+Text before System.out.println("postfix value: " + postfix_main);
+Text after System.out.println("postfix value: " + postfix_main);
+postfix_main);****
+Text before System.out.println("Value of b now: " + b_main);
+Text after System.out.println("Value of b now: " + b_main);
+b_main);****
+Generated COBOL:
+       PROCEDURE DIVISION.
+
+
+       ENTRY-PARA.
+           PERFORM MAIN-PARA
+           STOP RUN.
+
+
+       MAIN-PARA.
+       DISPLAY "\n------ Before ------"
+       DISPLAY "Value of a before: "
+       DISPLAY a_main
+       DISPLAY "Value of b before: "
+       DISPLAY b_main
+      * prefix increment operator
+       ADD 1 TO a_main.
+       COMPUTE prefix_main = a_main
+      * postfix increment operator
+       COMPUTE postfix_main = b_main
+       ADD 1 TO b_main.
+       DISPLAY "\n------ After ------"
+       DISPLAY "prefix value: "
+       DISPLAY prefix_main
+       DISPLAY "Value of a now: "
+       DISPLAY a_main
+       DISPLAY "postfix value: "
+       DISPLAY postfix_main
+       DISPLAY "Value of b now: "
+       DISPLAY b_main
+       EXIT.
+
+
+Procedure division written to genPD.txt
+COBOL code successfully written to ../finalCobolCode.cbl
+

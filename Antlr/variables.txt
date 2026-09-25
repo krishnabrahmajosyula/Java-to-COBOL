@@ -1,8 +1,8 @@
-Scope:Method:main->Class:PostPreFixOp->GLOBAL
+Scope:Method:main->Class:Test->GLOBAL
   Type:String
     args_main [size=[]]
 
-Scope:Block->Method:main->Class:PostPreFixOp->GLOBAL
+Scope:Block->Method:main->Class:Test->GLOBAL
   Type:int
     a_main
     b_main

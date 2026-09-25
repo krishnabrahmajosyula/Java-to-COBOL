@@ -91,11 +91,9 @@ WORK_BASE_DIR = os.path.expanduser("~/java2cob_work")   # javac temp files (not 
 # ---- COBOL validation stage (runs AFTER Java acceptance, on accepted files only) ----
 RUN_COBOL_VALIDATION = True
 
-REPO_ROOT = Path(__file__).resolve().parent.parent     # script sits at the Java-to-COBOL repo root
-print(f"Repo root: {REPO_ROOT}")
+REPO_ROOT = Path(__file__).resolve().parent.parent      # script sits at the Java-to-COBOL repo root
+print(f"Repo root dir: {REPO_ROOT}")
 ANTLR_DIR = REPO_ROOT / "Antlr"                  # tool folder, per your setup
-
-print(f"Antlr dir: {ANTLR_DIR}")
 ANTLR_JARS = ["antlr-4.13.2-complete.jar", "javaparser-core-3.25.8.jar"]
 SCOPING_CLASS = "TestJavaVariableScoping"
 PARSETREE_CLASS = "ParseTreeGeneration"
@@ -556,9 +554,28 @@ def rename_entry_class(source, old_name, new_name=ENTRY_CLASS_NEW_NAME):
     return re.sub(rf"\b{re.escape(old_name)}\b", new_name, source)
 
 
-def run_conversion_tool(java_source, entry_class_name):
+def extract_error_summary(combined_text, max_chars=None):
+    """Java tools print stack traces/errors after whatever else they log (e.g.
+    ParseTreeGeneration dumps the full parse tree before anything else), so a
+    naive head-truncation shows only noise. This jumps to the first line that
+    looks like a Java exception/error and takes the following ~40 lines
+    (typical stack trace length); if none is found, falls back to the tail."""
+    max_chars = max_chars or LOG_TRUNCATE_CHARS
+    lines = combined_text.splitlines()
+    marker_idx = next(
+        (i for i, ln in enumerate(lines)
+         if "Exception" in ln or "Error" in ln or ln.strip().startswith("at ")),
+        None)
+    snippet_lines = lines[marker_idx:marker_idx + 40] if marker_idx is not None else lines[-40:]
+    return "\n".join(snippet_lines)[:max_chars]
+
+
+def run_conversion_tool(java_source, entry_class_name, log_dir=None):
     """Mirrors the GUI's Run button: write Test.java, run the two tool jars from
-    ANTLR_DIR, read back finalCobolCode.cbl. Returns (ok, cobol_source_or_None, log)."""
+    ANTLR_DIR, read back finalCobolCode.cbl. Returns (ok, cobol_source_or_None, log).
+    The FULL combined output of both steps is always saved to
+    log_dir/antlr_tool.log (when log_dir is given), regardless of outcome --
+    the returned `log` string is only a short summary for the CSV."""
     test_path = ANTLR_DIR / "Test.java"
     cobol_path = ANTLR_DIR / FINAL_COBOL_NAME
 
@@ -576,18 +593,32 @@ def run_conversion_tool(java_source, entry_class_name):
                             encoding="utf-8", errors="replace", timeout=TOOL_STEP_TIMEOUT)
     except subprocess.TimeoutExpired:
         return False, None, f"{SCOPING_CLASS} timed out"
-    if s1.returncode != 0:
-        return False, None, f"{SCOPING_CLASS} failed:\n{(s1.stdout + s1.stderr)[:2000]}"
 
     cp_tree = os.pathsep.join(["."] + list(reversed(ANTLR_JARS)))
-    try:
-        s2 = subprocess.run(["java", "-cp", cp_tree, PARSETREE_CLASS, entry_class_name],
-                            cwd=ANTLR_DIR, capture_output=True, text=True,
-                            encoding="utf-8", errors="replace", timeout=TOOL_STEP_TIMEOUT)
-    except subprocess.TimeoutExpired:
-        return False, None, f"{PARSETREE_CLASS} timed out"
-    if s2.returncode != 0 or not cobol_path.exists():
-        return False, None, f"{PARSETREE_CLASS} failed:\n{(s2.stdout + s2.stderr)[:2000]}"
+    s2 = None
+    if s1.returncode == 0:
+        try:
+            s2 = subprocess.run(["java", "-cp", cp_tree, PARSETREE_CLASS, entry_class_name],
+                                cwd=ANTLR_DIR, capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", timeout=TOOL_STEP_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            return False, None, f"{PARSETREE_CLASS} timed out"
+
+    full_log = (f"=== {SCOPING_CLASS} (exit {s1.returncode}) ===\n{s1.stdout}{s1.stderr}\n\n"
+                + (f"=== {PARSETREE_CLASS} (exit {s2.returncode}) ===\n{s2.stdout}{s2.stderr}\n"
+                   if s2 is not None else f"=== {PARSETREE_CLASS} not run ===\n"))
+    if log_dir:
+        Path(log_dir).mkdir(parents=True, exist_ok=True)
+        (Path(log_dir) / "antlr_tool.log").write_text(full_log, encoding="utf-8")
+
+    if s1.returncode != 0:
+        return False, None, f"{SCOPING_CLASS} failed: " + extract_error_summary(s1.stdout + s1.stderr)
+    if s2.returncode != 0:
+        return False, None, f"{PARSETREE_CLASS} failed: " + extract_error_summary(s2.stdout + s2.stderr)
+    if not cobol_path.exists():
+        return False, None, (f"{PARSETREE_CLASS} exited 0 but never wrote {FINAL_COBOL_NAME} "
+                              f"(likely an unsupported construct it silently skipped -- "
+                              f"see antlr_tool.log)")
 
     try:
         cobol_source = cobol_path.read_text(encoding="utf-8", errors="replace")
@@ -599,8 +630,9 @@ def run_conversion_tool(java_source, entry_class_name):
 
 
 # ==================== STAGE 6: COMPILE + RUN THE COBOL ====================
-def compile_and_run_cobol(cobol_source, stdin_text):
-    """Returns dict with compile_ok, run_ok, stdout, error."""
+def compile_and_run_cobol(cobol_source, stdin_text, log_dir=None):
+    """Returns dict with compile_ok, run_ok, stdout, error. Full cobc/run output
+    is saved to log_dir/cobol_compile.log and log_dir/cobol_run.log when given."""
     os.makedirs(COBOL_WORK_BASE_DIR, exist_ok=True)
     result = {"compile_ok": False, "run_ok": False, "stdout": "", "error": ""}
     with tempfile.TemporaryDirectory(dir=COBOL_WORK_BASE_DIR) as tmp:
@@ -619,8 +651,12 @@ def compile_and_run_cobol(cobol_source, stdin_text):
         except FileNotFoundError:
             result["error"] = f"'{GNUCOBOL_CMD}' not found on PATH -- is GnuCOBOL installed?"
             return result
+        if log_dir:
+            Path(log_dir).mkdir(parents=True, exist_ok=True)
+            (Path(log_dir) / "cobol_compile.log").write_text(
+                f"exit {c.returncode}\n{c.stdout}{c.stderr}", encoding="utf-8")
         if c.returncode != 0 or not exe.exists():
-            result["error"] = c.stderr.strip()[:2000] or c.stdout.strip()[:2000]
+            result["error"] = extract_error_summary(c.stdout + c.stderr) or "cobc compile failed"
             return result
         result["compile_ok"] = True
 
@@ -632,18 +668,23 @@ def compile_and_run_cobol(cobol_source, stdin_text):
         except subprocess.TimeoutExpired:
             result["error"] = "cobol run timed out"
             return result
+        if log_dir:
+            (Path(log_dir) / "cobol_run.log").write_text(
+                f"exit {r.returncode}\nSTDOUT:\n{r.stdout}\nSTDERR:\n{r.stderr}", encoding="utf-8")
         if r.returncode != 0:
-            result["error"] = r.stderr.strip()[:2000] or f"exit code {r.returncode}"
+            result["error"] = extract_error_summary(r.stderr) or f"exit code {r.returncode}"
             return result
         result["run_ok"] = True
         result["stdout"] = r.stdout
     return result
 
 
-def validate_with_cobol(file_label, java_source, meta, java_stdin, java_output):
+def validate_with_cobol(file_label, java_source, meta, java_stdin, java_output, log_dir=None):
     """Runs stages 5+6 for one accepted program. Returns (row, cobol_source_or_None)
     where row has exactly: file, java_compile, cobol_compile, java_output, cobol_output.
-    Wherever a stage has no real output, the column holds the error instead."""
+    Wherever a stage has no real output, the column holds the error instead.
+    Full tool/compiler/run logs are saved under log_dir when given -- the CSV
+    only ever holds a short summary, never the whole trace."""
     entry_class = meta["file_name"]
     row = {
         "file": file_label,
@@ -653,25 +694,26 @@ def validate_with_cobol(file_label, java_source, meta, java_stdin, java_output):
         "cobol_output": "",
     }
 
-    tool_ok, cobol_source, tool_log = run_conversion_tool(java_source, entry_class)
+    tool_ok, cobol_source, tool_log = run_conversion_tool(java_source, entry_class, log_dir)
     if not tool_ok:
-        err = f"conversion tool failed: {tool_log}"[:LOG_TRUNCATE_CHARS]
+        err = f"conversion tool failed: {tool_log} [full log: antlr_tool.log]"[:LOG_TRUNCATE_CHARS]
         row["cobol_compile"] = err
         row["cobol_output"] = err
         return row, None
 
-    cres = compile_and_run_cobol(cobol_source, java_stdin)
+    cres = compile_and_run_cobol(cobol_source, java_stdin, log_dir)
     if not cres["compile_ok"]:
-        err = cres["error"][:LOG_TRUNCATE_CHARS] or "cobc compile failed"
-        row["cobol_compile"] = err
-        row["cobol_output"] = err
+        err = (cres["error"] or "cobc compile failed") + " [full log: cobol_compile.log]"
+        row["cobol_compile"] = err[:LOG_TRUNCATE_CHARS]
+        row["cobol_output"] = err[:LOG_TRUNCATE_CHARS]
         return row, cobol_source
 
     row["cobol_compile"] = "ok"
     if cres["run_ok"]:
         row["cobol_output"] = cres["stdout"][:LOG_TRUNCATE_CHARS]
     else:
-        row["cobol_output"] = (cres["error"][:LOG_TRUNCATE_CHARS] or "cobol run failed")
+        err = (cres["error"] or "cobol run failed") + " [full log: cobol_run.log]"
+        row["cobol_output"] = err[:LOG_TRUNCATE_CHARS]
 
     return row, cobol_source
 
@@ -818,7 +860,8 @@ def main():
 
             if RUN_COBOL_VALIDATION:
                 file_label = f"{blob_id}/{meta['file_name']}.java"
-                row, cobol_source = validate_with_cobol(file_label, source, meta, stdin_text, out)
+                row, cobol_source = validate_with_cobol(
+                    file_label, source, meta, stdin_text, out, log_dir=dest)
                 if cobol_source:
                     (dest / "generated.cbl").write_text(cobol_source, encoding="utf-8")
                 comparison_writer.writerow([
