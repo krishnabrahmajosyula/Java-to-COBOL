@@ -178,13 +178,11 @@ public class JavaToCobolListenerPD extends JavaParserBaseListener{
                 returnVars.put(method.identifier().getText(), returnType);
             }
             List<String> parameters = new ArrayList<>();
-            if (method.formalParameters() != null
-                    && method.formalParameters().formalParameterList() != null) {
-                for (JavaParser.FormalParameterContext parameter
-                        : method.formalParameters().formalParameterList().formalParameter()) {
-                    parameters.add(parameter.variableDeclaratorId().getText());
-                }
-            }
+            // NOTE: we intentionally do NOT populate parameters here with raw Java
+            // param names.  enterMethodDeclaration() will store the correct COBOL
+            // param names under the "ClassName#method" key.  Storing raw names here
+            // under the plain "method" key caused the call site to pick up stale
+            // raw names (e.g. "a","b") instead of "METHODTEST-ADD-A_ADD" etc.
             methodParameters.put(method.identifier().getText(), parameters);
         }
         for (int i = 0; i < node.getChildCount(); i++) {
@@ -395,6 +393,19 @@ public class JavaToCobolListenerPD extends JavaParserBaseListener{
         }
        
         String sourceText = tokens.getText(ctx);
+        // ── FOR-loop init guard: must run BEFORE emitNumericDeclaration because
+        // "int i = 1" matches that branch and returns early, bypassing the
+        // forLoopInitVars check that only appears later in the method.
+        // Extract the declared variable name and suppress emission if it was
+        // registered as a for-loop init variable.
+        {
+            java.util.regex.Matcher initMatcher = java.util.regex.Pattern
+                .compile("(?:int|long|short|byte|double|float|var)\\s+(\\w+)\\s*=")
+                .matcher(sourceText);
+            if (initMatcher.find() && forLoopInitVars.contains(initMatcher.group(1))) {
+                return;
+            }
+        }
         if (emitNumericDeclaration(sourceText)) {
             return;
         }
@@ -1155,20 +1166,30 @@ public class JavaToCobolListenerPD extends JavaParserBaseListener{
 
         if(text.matches("^[a-zA-Z_][a-zA-Z0-9_]*\\s*\\(.*\\)\\s*;?$") && !text.contains("=")){
             String call=text.substring(0,text.indexOf('(')).trim();
-            // String methodName=call.toUpperCase()+"-PARA";
-            String methodName=call+"-PARA";
+            // Build paragraph name exactly as enterMethodDeclaration does:
+            // non-OOP static methods  →  CLASSNAME-METHODNAME-PARA
+            String paraName = (currentClassName != null
+                ? currentClassName.toUpperCase() + "-" + call.toUpperCase()
+                : call.toUpperCase()) + "-PARA";
             String argList=text.substring(text.indexOf('(')+1,text.lastIndexOf(')'));
 
             List<String> argValues = splitArguments(argList);
 
-            List<String>paramNames=methodParameters.getOrDefault(call, new ArrayList<>());
+            // Look up by "ClassName#method" first — enterMethodDeclaration stores
+            // COBOL param names (e.g. METHODTEST-ADD-A_ADD) under that key.
+            // collectReturnTypes() stores raw Java names under the plain key;
+            // we must prefer the COBOL names so the MOVE targets match the para body.
+            String ooKey = (currentClassName != null ? currentClassName + "#" : "") + call;
+            List<String> paramNames = methodParameters.containsKey(ooKey)
+                ? methodParameters.get(ooKey)
+                : methodParameters.getOrDefault(call, new ArrayList<>());
             int count=Math.min(paramNames.size(), argValues.size());
             for (int i = 0; i < count; i++) {
                 String rawArg = processExpressionWithCalls(argValues.get(i));
                 String finalArg = translateArgumentExpression(rawArg);
                 emitCobol(INDENT + "MOVE " + finalArg + " TO " + paramNames.get(i) + "\n");
             }
-            emitCobol(INDENT + "PERFORM " + methodName + "\n");
+            emitCobol(INDENT + "PERFORM " + paraName + "\n");
             return;
         }
         // ── OOP: instance method call  obj.method(args) ───────────────────
@@ -1183,18 +1204,25 @@ public class JavaToCobolListenerPD extends JavaParserBaseListener{
                 String className = objectVariables.get(objVar);
                 if (className != null && classInfoMap.containsKey(className)) {
                     String instRecord = className.toUpperCase() + "-" + objVar.toUpperCase() + "-INST";
-                    String paraName = className.toUpperCase() + "-" + methName.toUpperCase() + "-PARA";
+                    // Walk the inheritance chain to find which class actually declares
+                    // this method. d.speak() where speak() is in Animal (not Dog) must
+                    // dispatch to ANIMAL-SPEAK-PARA, not the non-existent DOG-SPEAK-PARA.
+                    String ownerClass = findMethodOwner(className, methName);
+                    String paraName = ownerClass.toUpperCase() + "-" + methName.toUpperCase() + "-PARA";
                     emitCobol(INDENT + "MOVE " + instRecord + " TO " + className.toUpperCase() + "-OBJ\n");
                     List<String> argValues = splitArgs(argList);
-                    ClassInfoExtractor.ClassInfo cls = classInfoMap.get(className);
-                    ClassInfoExtractor.MethodInfo method = cls.methods.stream()
-                        .filter(mm -> mm.name.equals(methName))
-                        .findFirst().orElse(null);
+                    // Find method info from the owning class
+                    ClassInfoExtractor.ClassInfo ownerCls = classInfoMap.get(ownerClass);
+                    ClassInfoExtractor.MethodInfo method = (ownerCls != null)
+                        ? ownerCls.methods.stream()
+                            .filter(mm -> mm.name.equals(methName))
+                            .findFirst().orElse(null)
+                        : null;
                     if (method != null) {
                         for (int mi = 0; mi < Math.min(method.paramNames.size(), argValues.size()); mi++) {
                             emitCobol(INDENT + "MOVE "
                                 + translateArgumentExpression(argValues.get(mi))
-                                + " TO " + oopParameterName(className, methName,
+                                + " TO " + oopParameterName(ownerClass, methName,
                                         method.paramNames.get(mi)) + "\n");
                         }
                     }
@@ -2001,11 +2029,12 @@ public class JavaToCobolListenerPD extends JavaParserBaseListener{
                     String idxVar    = loopVar + "-IDX";
                     String sizeVar   = iterExpr  + "-MAX";   // must exist in DATA DIVISION
 
+                    // First statement of the body must be: MOVE iterExpr(IDX) TO loopVar
+                    emitCobol(INDENT + "    MOVE " + iterExpr + "(" + idxVar + ") TO " + loopVar + "\n");
+
                     // Emit: PERFORM VARYING loopVar-IDX FROM 1 BY 1 UNTIL loopVar-IDX > iterExpr-SIZE
                     emitCobol(INDENT + "PERFORM VARYING " + idxVar
                         + " FROM 1 BY 1 UNTIL " + idxVar + " > " + sizeVar + "\n");
-                    // First statement of the body must be: MOVE iterExpr(IDX) TO loopVar
-                    emitCobol(INDENT + "    MOVE " + iterExpr + "(" + idxVar + ") TO " + loopVar + "\n");
 
                     blockStack.push("FOR");
                     forLoopRecomputeStack.push(new ArrayList<>());
@@ -2565,14 +2594,25 @@ public class JavaToCobolListenerPD extends JavaParserBaseListener{
                 }
 
                 List<String> arguments = splitArguments(matcher.group(2));
-                List<String> parameters = methodParameters.getOrDefault(methodName, Collections.emptyList());
+                // Prefer "ClassName#method" key to get COBOL param names
+                String ooMethodKey = (currentClassName != null ? currentClassName + "#" : "") + methodName;
+                List<String> parameters = methodParameters.containsKey(ooMethodKey)
+                    ? methodParameters.get(ooMethodKey)
+                    : methodParameters.getOrDefault(methodName, Collections.emptyList());
                 for (int i = 0; i < Math.min(arguments.size(), parameters.size()); i++) {
                     String argument = processExpressionWithCalls(arguments.get(i));
                     argument = translateArgumentExpression(argument);
                     emitCobol(INDENT + "MOVE " + argument + " TO " + parameters.get(i) + "\n");
                 }
-                emitCobol(INDENT + "PERFORM " + methodName + "-PARA\n");
-                matcher.appendReplacement(replacement, Matcher.quoteReplacement("RETURN-" + methodName));
+                // Build para name and return-variable name to match enterMethodDeclaration
+                String callParaName = (currentClassName != null
+                    ? currentClassName.toUpperCase() + "-" + methodName.toUpperCase()
+                    : methodName.toUpperCase()) + "-PARA";
+                String returnVarName = currentClassName != null
+                    ? "RETURN-" + currentClassName.toUpperCase() + "-" + methodName.toUpperCase()
+                    : "RETURN-" + methodName;
+                emitCobol(INDENT + "PERFORM " + callParaName + "\n");
+                matcher.appendReplacement(replacement, Matcher.quoteReplacement(returnVarName));
                 foundReturningCall = true;
             }
             matcher.appendTail(replacement);
@@ -3325,6 +3365,27 @@ public class JavaToCobolListenerPD extends JavaParserBaseListener{
     }
 
 
+
+    /**
+     * Walks the classInfoMap inheritance chain starting from className to find
+     * which class actually declares a method called methodName.
+     * Returns className itself if the method is found there, otherwise walks
+     * up via parentClass. Falls back to className if not found anywhere
+     * (keeps old behaviour for unresolved cases).
+     */
+    private String findMethodOwner(String className, String methodName) {
+        String current = className;
+        while (current != null && classInfoMap.containsKey(current)) {
+            ClassInfoExtractor.ClassInfo info = classInfoMap.get(current);
+            for (ClassInfoExtractor.MethodInfo m : info.methods) {
+                if (m.name.equals(methodName)) {
+                    return current;   // found — this class owns the method
+                }
+            }
+            current = info.parentClass;   // walk up
+        }
+        return className;   // not found — fall back to declared type
+    }
 
     private String reduceArithmeticToTemp(String expr) {
         expr = stripRedundantParens(expr);

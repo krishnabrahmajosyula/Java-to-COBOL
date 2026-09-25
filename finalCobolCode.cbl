@@ -1,24 +1,22 @@
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. Animal.
+       PROGRAM-ID. PostPreFixOp.
 
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-      * Variables for Scope:METHOD_MAIN_CLASS_MAIN_GLOBAL
+      * Variables for Scope:METHOD_MAIN_CLASS_POSTPREFIXOP_GLOBAL
        01  args_main-ARRAY.
            05  args_main    PIC X(100) OCCURS 100 TIMES.
        01  args_main-MAX   PIC S9(9) VALUE 100.
-      * Class record: Animal
-       01  ANIMAL-OBJ.
-           05  ANIMAL-OBJ-NAME         PIC X(100).
-      * Class record: Dog
-       01  DOG-OBJ.
-           05  DOG-OBJ-NAME         PIC X(100).
-           05  DOG-OBJ-AGE          PIC S9(9).
+      * Variables for Scope:BLOCK_METHOD_MAIN_CLASS_POSTPREFIXOP_GLOBAL
+       01  a_main          PIC S9(9).
+       01  b_main          PIC S9(9).
+       01  prefix_main     PIC S9(9).
+       01  postfix_main    PIC S9(9).
+      * Class record: PostPreFixOp
+       01  POSTPREFIXOP-OBJ.
+           05  FILLER          PIC X(1).
       * Object instance records
-       01  DOG-D-INST.
-           05  DOG-D-INST-NAME         PIC X(100).
-           05  DOG-D-INST-AGE          PIC S9(9).
       * OOP method parameters
 
 
@@ -30,24 +28,27 @@
            STOP RUN.
 
 
-       ANIMAL-SPEAK-PARA.
-       DISPLAY ANIMAL-OBJ-NAME
-       EXIT.
-
-
-       DOG-SPEAK-PARA.
-       DISPLAY DOG-OBJ-NAME
-       DISPLAY DOG-OBJ-AGE
-       EXIT.
-
-
        MAIN-PARA.
-       INITIALIZE DOG-D-INST
-       MOVE "Rex" TO DOG-D-INST-NAME
-       MOVE 3 TO DOG-D-INST-AGE
-       MOVE DOG-D-INST TO DOG-OBJ
-       PERFORM DOG-SPEAK-PARA
-       MOVE DOG-OBJ TO DOG-D-INST
+       DISPLAY "\n------ Before ------"
+       DISPLAY "Value of a before: "
+       DISPLAY a_main
+       DISPLAY "Value of b before: "
+       DISPLAY b_main
+      * prefix increment operator
+       ADD 1 TO a_main.
+       COMPUTE prefix_main = a_main
+      * postfix increment operator
+       COMPUTE postfix_main = b_main
+       ADD 1 TO b_main.
+       DISPLAY "\n------ After ------"
+       DISPLAY "prefix value: "
+       DISPLAY prefix_main
+       DISPLAY "Value of a now: "
+       DISPLAY a_main
+       DISPLAY "postfix value: "
+       DISPLAY postfix_main
+       DISPLAY "Value of b now: "
+       DISPLAY b_main
        EXIT.
 
 

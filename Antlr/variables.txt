@@ -1,4 +1,11 @@
-Scope:Method:main->Class:Main->GLOBAL
+Scope:Method:main->Class:PostPreFixOp->GLOBAL
   Type:String
     args_main [size=[]]
+
+Scope:Block->Method:main->Class:PostPreFixOp->GLOBAL
+  Type:int
+    a_main
+    b_main
+    prefix_main
+    postfix_main
 

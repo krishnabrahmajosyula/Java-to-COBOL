@@ -1,7 +1,0 @@
-/**
- * TestScoped
- */
-public class TestScoped {
-
-    
-}

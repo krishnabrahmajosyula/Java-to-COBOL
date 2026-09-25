@@ -6,23 +6,26 @@
            STOP RUN.
 
 
-       ANIMAL-SPEAK-PARA.
-       DISPLAY ANIMAL-OBJ-NAME
-       EXIT.
-
-
-       DOG-SPEAK-PARA.
-       DISPLAY DOG-OBJ-NAME
-       DISPLAY DOG-OBJ-AGE
-       EXIT.
-
-
        MAIN-PARA.
-       INITIALIZE DOG-D-INST
-       MOVE "Rex" TO DOG-D-INST-NAME
-       MOVE 3 TO DOG-D-INST-AGE
-       MOVE DOG-D-INST TO DOG-OBJ
-       PERFORM DOG-SPEAK-PARA
-       MOVE DOG-OBJ TO DOG-D-INST
+       DISPLAY "\n------ Before ------"
+       DISPLAY "Value of a before: "
+       DISPLAY a_main
+       DISPLAY "Value of b before: "
+       DISPLAY b_main
+      * prefix increment operator
+       ADD 1 TO a_main.
+       COMPUTE prefix_main = a_main
+      * postfix increment operator
+       COMPUTE postfix_main = b_main
+       ADD 1 TO b_main.
+       DISPLAY "\n------ After ------"
+       DISPLAY "prefix value: "
+       DISPLAY prefix_main
+       DISPLAY "Value of a now: "
+       DISPLAY a_main
+       DISPLAY "postfix value: "
+       DISPLAY postfix_main
+       DISPLAY "Value of b now: "
+       DISPLAY b_main
        EXIT.
 

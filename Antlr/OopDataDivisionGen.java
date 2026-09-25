@@ -23,12 +23,14 @@ public class OopDataDivisionGen {
                     && !classes.get(cls.parentClass).fields.isEmpty();
             boolean hasInstanceState = hasInheritedFields || !cls.fields.isEmpty();
             // ── 1. Template record (used as scratch during method calls) ──
-            if (hasInstanceState) {
-                writer.printf("      * Class record: %s%n", cls.className);
-                writer.printf("       01  %s-OBJ.%n", cls.className.toUpperCase());
-            }
+            // Always emit even when the class has no fields (e.g. Dog extends Animal
+            // but adds no new fields). An empty group record is invalid COBOL, so
+            // we add a FILLER when there are no real fields to declare.
+            writer.printf("      * Class record: %s%n", cls.className);
+            writer.printf("       01  %s-OBJ.%n", cls.className.toUpperCase());
 
             // Inherit parent fields first (single-level only)
+            boolean wroteAnyField = false;
             if (cls.parentClass != null && classes.containsKey(cls.parentClass)) {
                 ClassInfoExtractor.ClassInfo parent = classes.get(cls.parentClass);
                 for (ClassInfoExtractor.FieldInfo f : parent.fields) {
@@ -36,6 +38,7 @@ public class OopDataDivisionGen {
                         cls.className.toUpperCase() + "-OBJ-",
                         f.name.toUpperCase(),
                         mapJavaToPic(f.type));
+                    wroteAnyField = true;
                 }
             }
             // Own fields
@@ -44,6 +47,11 @@ public class OopDataDivisionGen {
                     cls.className.toUpperCase() + "-OBJ-",
                     f.name.toUpperCase(),
                     mapJavaToPic(f.type));
+                wroteAnyField = true;
+            }
+            // If no fields at all, emit a FILLER to keep the group record valid
+            if (!wroteAnyField) {
+                writer.printf("           05  FILLER          PIC X(1).%n");
             }
 
             // ── 2. Return value variables per non-void method ──
@@ -69,17 +77,24 @@ public class OopDataDivisionGen {
                 className.toUpperCase(), varName.toUpperCase());
 
             // Inherit parent fields
+            boolean wroteInstField = false;
             if (cls.parentClass != null && classes.containsKey(cls.parentClass)) {
                 for (ClassInfoExtractor.FieldInfo f : classes.get(cls.parentClass).fields) {
                     writer.printf("           05  %s-%s-INST-%-12s %s%n",
                         className.toUpperCase(), varName.toUpperCase(),
                         f.name.toUpperCase(), mapJavaToPic(f.type));
+                    wroteInstField = true;
                 }
             }
             for (ClassInfoExtractor.FieldInfo f : cls.fields) {
                 writer.printf("           05  %s-%s-INST-%-12s %s%n",
                     className.toUpperCase(), varName.toUpperCase(),
                     f.name.toUpperCase(), mapJavaToPic(f.type));
+                wroteInstField = true;
+            }
+            // Guard: an empty group record is invalid COBOL
+            if (!wroteInstField) {
+                writer.printf("           05  FILLER          PIC X(1).%n");
             }
         }
 

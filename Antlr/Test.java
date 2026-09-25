@@ -1,27 +1,27 @@
-public class Animal {
-    String name;
+public class PostPreFixOp {
 
-    void speak() {
-        System.out.println(name);
-    }
-}
-
-class Dog extends Animal {
-    int age;
-
-    void speak() {
-        System.out.println(name);
-        System.out.println(age);
-    }
-}
-
-class Main {
     public static void main(String[] args) {
-        Dog d = new Dog();
 
-        d.name = "Rex";
-        d.age = 3;
+        int a = 10, b = 10;
 
-        d.speak();
+        System.out.println("\n------ Before ------");
+        System.out.println("Value of a before: " + a);
+        System.out.println("Value of b before: " + b);
+
+        int prefix = ++a; // prefix increment operator
+        int postfix = b++; // postfix increment operator
+
+        System.out.println("\n------ After ------");
+
+        System.out.println("prefix value: " + prefix);
+        System.out.println("Value of a now: " + a);
+
+        System.out.println("postfix value: " + postfix);
+        System.out.println("Value of b now: " + b);
+
+
+
+
     }
+
 }
