@@ -1,12 +1,1 @@
 file,java_compile,cobol_compile,java_output,cobol_output
-a5b8c06e848d7d208d9eb36e5f0f2ca0673da158/PostPreFixOp.java,ok,conversion tool failed: ParseTreeGeneration exited 0 but never wrote finalCobolCode.cbl (likely an unsupported construct it silently skipped -- see antlr_tool.log) [full log: antlr_tool.log],"
------- Before ------
-Value of a before: 10
-Value of b before: 10
-
------- After ------
-prefix value: 11
-Value of a now: 11
-postfix value: 10
-Value of b now: 11
-",conversion tool failed: ParseTreeGeneration exited 0 but never wrote finalCobolCode.cbl (likely an unsupported construct it silently skipped -- see antlr_tool.log) [full log: antlr_tool.log]

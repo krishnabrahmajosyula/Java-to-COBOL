@@ -108,10 +108,10 @@ COBOL_WORK_BASE_DIR = os.path.expanduser("~/cobol_work")   # cobc compile/run sc
 COMPARISON_LOG = "comparison_log.csv"
 LOG_TRUNCATE_CHARS = 800
 
-# ASSUMPTION (unverified against the real GUI code): the tool needs its entry class
-# named "Test" on disk (Test.java) but is told the ORIGINAL class name via argv, exactly
-# as in the snippet you pasted. Renaming here is a plain whole-word identifier swap; it
-# has NOT been checked against the real findEntryClassName / rewriteEntryClassToTest.
+# The converter is driven through the same stable entry class used by the GUI
+# harness: Test.java / class Test. Both conversion stages therefore receive
+# the same class name. The original class name is retained only for dataset
+# metadata and logging.
 ENTRY_CLASS_NEW_NAME = "Test"
 
 # ========================= ALLOWLIST TABLES =========================
@@ -310,7 +310,9 @@ class Validator:
                 return "child redeclares a parent field"
             psigs = {m.name: _sig(m) for m in parent.methods}
             for m in cls.methods:
-                if m.name in psigs and psigs[m.name] != _sig(m):
+                if m.name in psigs:
+                    if psigs[m.name] == _sig(m):
+                        return f"method '{m.name}' overrides a parent method"
                     return f"method '{m.name}' overloads a parent method"
         if not ALLOW_UNRELATED_CLASSES:
             for cname in self.classes:
@@ -577,7 +579,7 @@ def run_conversion_tool(java_source, entry_class_name, log_dir=None):
     log_dir/antlr_tool.log (when log_dir is given), regardless of outcome --
     the returned `log` string is only a short summary for the CSV."""
     test_path = ANTLR_DIR / "Test.java"
-    cobol_path = ANTLR_DIR / FINAL_COBOL_NAME
+    cobol_path = REPO_ROOT / FINAL_COBOL_NAME
 
     if not ANTLR_DIR.is_dir():
         return False, None, f"Antlr dir not found at {ANTLR_DIR}"
@@ -598,7 +600,7 @@ def run_conversion_tool(java_source, entry_class_name, log_dir=None):
     s2 = None
     if s1.returncode == 0:
         try:
-            s2 = subprocess.run(["java", "-cp", cp_tree, PARSETREE_CLASS, entry_class_name],
+            s2 = subprocess.run(["java", "-cp", cp_tree, PARSETREE_CLASS, ENTRY_CLASS_NEW_NAME],
                                 cwd=ANTLR_DIR, capture_output=True, text=True,
                                 encoding="utf-8", errors="replace", timeout=TOOL_STEP_TIMEOUT)
         except subprocess.TimeoutExpired:
@@ -616,9 +618,12 @@ def run_conversion_tool(java_source, entry_class_name, log_dir=None):
     if s2.returncode != 0:
         return False, None, f"{PARSETREE_CLASS} failed: " + extract_error_summary(s2.stdout + s2.stderr)
     if not cobol_path.exists():
-        return False, None, (f"{PARSETREE_CLASS} exited 0 but never wrote {FINAL_COBOL_NAME} "
-                              f"(likely an unsupported construct it silently skipped -- "
-                              f"see antlr_tool.log)")
+        # A zero exit code does not guarantee that the converter actually
+        # generated output. Keep the candidate; let the conversion stage
+        # report the failure instead of rejecting a Java feature in the AST
+        # filter. The complete diagnostic is preserved in antlr_tool.log.
+        return False, None, (f"{PARSETREE_CLASS} completed successfully but did not "
+                              f"generate {FINAL_COBOL_NAME}; see antlr_tool.log")
 
     try:
         cobol_source = cobol_path.read_text(encoding="utf-8", errors="replace")
